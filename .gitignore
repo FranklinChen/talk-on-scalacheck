@@ -1,0 +1,9 @@
+target
+.ensime*
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb

@@ -1,0 +1,570 @@
+\documentclass{beamer}
+
+\mode<presentation>
+
+\usepackage{minted}
+
+% End up with magenta links; don't know how to change color; linkcolor fails
+\hypersetup{colorlinks=true}
+
+\title{Beyond \texttt{xUnit} example-based testing: property-based testing with \href{https://github.com/rickynils/scalacheck}{\texttt{ScalaCheck}}}
+\author{\href{http://franklinchen.com/}{Franklin Chen}}
+\date{\href{http://www.meetup.com/Pittsburgh-Scala-Meetup/events/108080782}{Pittsburgh Scala Meetup} \\
+April 11, 2013
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% TODO
+%\section*{Outline}
+%\begin{frame}
+%  \frametitle{Outline}
+%  \tableofcontents[pausesections]
+%\end{frame}
+
+\begin{frame}
+  \frametitle{Our goal: software correctness}
+
+  \uncover<1-> Use all available tools that are \emph{practical} in \emph{context}.
+
+  \begin{itemize}
+    \item<2-> Static \href{http://en.wikipedia.org/wiki/Type\_system}{type system}
+      \begin{itemize}
+        \item<3-> We are \href{http://www.scala-lang.org/}{Scala} users!
+      \end{itemize}
+    \item<4-> Two extremes
+      \begin{itemize}
+        \item<5-> \href{http://en.wikipedia.org/wiki/Automated\_theorem\_proving}{Automated theorem proving}
+        \item<6-> Testing
+      \end{itemize}
+  \end{itemize}
+
+  \uncover<7->{What is \emph{practical}?}
+\end{frame}
+
+% Uncover is problematic
+\begin{frame}[fragile]
+  \frametitle{Theorem proving}
+
+  \begin{block}{Example: list append}
+    \begin{minted}{scala}
+// Given an implementation in ListOps of:
+def append[A](xs: List[A], ys: List[A]): List[A]
+    \end{minted}
+  \end{block}
+
+  \begin{block}{How prove this property \emph{without a shadow of a doubt}?}
+    \begin{minted}{scala}
+// for all lists xs and ys
+ListOps.append(xs, ys).length == xs.length + y.length
+    \end{minted}
+  \end{block}
+
+  \begin{block}{Not (yet) \emph{practical} in most contexts.}
+    (Scala compiler cannot prove this property.)
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{More powerful static type system: \href{http://en.wikipedia.org/wiki/Dependent\_type}{dependent types}}
+
+  \begin{block}{Try using a more powerful language?}
+    \begin{itemize}
+      \item Example: \href{http://idris-lang.org/}{Idris} language, based on \href{http://haskell.org/}{Haskell}
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Type checks!}
+    % Pretend to Pygments that Idris is Haskell
+    \begin{minted}{haskell}
+(++) : Vect A n -> Vect A m -> Vect A (n + m)
+(++) Nil       ys = ys
+(++) (x :: xs) ys = x :: xs ++ ys
+    \end{minted}
+  \end{block}
+
+  \begin{block}{Still research, however.}
+    \begin{itemize}
+      \item Also: Scala libraries such as \href{https://github.com/milessabin/shapeless}{\texttt{shapeless}} pushing the edge of Scala's type system.
+      \item Not (yet) \emph{practical} for most of us.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Testing}
+
+  \uncover<1->{Goals?}
+
+  \begin{itemize}
+    \item<2-> Give up goal of mathematical guarantee of correctness.
+    \item<3-> Try to gain \emph{confidence} that our code might be ``probably'' or ``mostly'' correct.
+    \item<4-> Still a young field. Recent report on the state of testing: \href{http://blog.sei.cmu.edu/post.cfm/common-testing-problems-pitfalls-to-prevent-and-mitigate}{SEI blog}
+  \end{itemize}
+
+  \uncover<5->{Remember to be humble when testing; avoid overconfidence!}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example-based testing}
+
+  \begin{itemize}
+    \item \texttt{xUnit} frameworks such as \href{http://junit.org/}{\texttt{JUnit}}
+    \item Hand-craft specific example scenarios, make assertions
+  \end{itemize}
+
+  \uncover<1->{Popular Scala test frameworks that support \texttt{xUnit} style testing:}
+
+  \begin{itemize}
+    \item<2-> \href{http://scalatest.org/}{\texttt{ScalaTest}}
+    \item<3-> \href{http://etorreborre.github.io/specs2/}{\texttt{specs2}}
+  \end{itemize}
+
+  \uncover<4->{For concreteness: I test with \texttt{specs2}, with \href{http://www.scala-sbt.org/}{\texttt{SBT}}.}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Individual examples of list append}
+
+  \begin{minted}{scala}
+// Individually hand-crafted examples
+ListOps.append(List(3), List(7, 2)).length must_==
+  List(3).length + List(7, 2).length
+ListOps.append(List(3, 4), List(7, 2)).length must_==
+  List(3, 4).length + List(7, 2).length
+// ...
+  \end{minted}
+
+  \begin{itemize}
+    \item Tedious to set up each example, one by one.
+    \item Are we confident that we listed all the relevant cases, including corner cases?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Refactoring to a data table}
+
+  \begin{minted}{scala}
+// Hand-crafted table of data, but logic is factored out
+"xs"       | "ys"       |
+List(3)    ! List(7, 2) |
+List(3, 4) ! List(7, 2) |> {
+  (xs, ys) =>
+  ListOps.append(xs, ys).length must_==
+    xs.length + ys.length
+}
+  \end{minted}
+
+  Note: latest \texttt{JUnit} supports \href{https://github.com/junit-team/junit/wiki/Parameterized-tests}{parameterized tests} also.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Property-based testing: introducing \texttt{ScalaCheck}}
+
+  \begin{itemize}
+    \item \texttt{ScalaCheck} library
+      \begin{itemize}
+        \item Port of Haskell \href{http://en.wikipedia.org/wiki/QuickCheck}{\texttt{QuickCheck}}
+        \item Use standalone, or within \texttt{ScalaTest} or \texttt{specs2}
+      \end{itemize}
+    \item Write down what we really intend, a universal property!
+  \end{itemize}
+
+  \begin{minted}{scala}
+prop {
+  (xs: List[Int], ys: List[Int]) =>
+  ListOps.append(xs, ys).length must_==
+    xs.length + ys.length
+}
+  \end{minted}
+
+  \texttt{ScalaCheck} automatically generates 100 random test cases (the default number) and runs them successfully!
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Property-based testing: fake theorem proving?}
+
+  \begin{itemize}
+    \item<1-> Theorem proving is hard.
+    \item<2-> \texttt{ScalaCheck} allows us to pretend we are theorem proving, with caveats:
+      \begin{itemize}
+        \item<3-> How random are the generated data?
+        \item<4-> How useful for our desired corner cases?
+        \item<5-> How can we customize the generation?
+        \item<6-> How reproducible is the test run?
+        \item<7-> How confident can we be in the coverage?
+      \end{itemize}
+  \end{itemize}
+
+  \uncover<8->{Property-based testing is still an area of research.}
+
+  \uncover<9->{But it is already useful as it is.}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A failing test reports a minimal counter-example}
+
+  What is wrong with this property about multiplication and division?
+
+  \begin{minted}{scala}
+prop {
+  (x: Int, y: Int) => (x * y) / y must_== x
+}
+  \end{minted}
+
+  Output:
+
+  \begin{minted}{console}
+> test
+ArithmeticException: A counter-example is [0, 0]:
+  java.lang.ArithmeticException: / by zero
+  \end{minted}
+
+  Oops, our test was sloppy!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Introducing conditional properties}
+
+  Exclude dividing by 0: use \emph{conditional} operator \texttt{==>} with \texttt{forAll}:
+
+  \begin{minted}{scala}
+prop {
+  x: Int =>
+  forAll {
+    y: Int =>
+    (y != 0) ==> { (x * y) / y must_== x  }
+  }
+}
+  \end{minted}
+
+  \begin{itemize}
+    \item Generate random \texttt{x}.
+    \item Generate random \texttt{y}, but discard test case if conditions fails.
+  \end{itemize}
+
+  All good now?
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Testing as an iterative process}
+
+  \begin{itemize}
+    \item Still get a counter-example.
+    \item \texttt{Int} overflow.
+  \end{itemize}
+
+  \begin{minted}{console}
+> test
+A counter-example is [2, 1073741824]
+  (after 2 tries - shrinked
+   ('452994647' -> '2','-2147483648' -> '1073741824'))
+'-2' is not equal to '2'
+  \end{minted}
+
+  Writing and refining a property guides our understanding of the problem.
+\end{frame}
+
+\begin{frame}
+  \frametitle{The joy of experimental testing}
+
+  \texttt{ScalaCheck} discovered an unexpected edge case for us!
+
+  \begin{itemize}
+    \item<1-> Write a general property before coding.
+    \item<2-> Write the code.
+    \item<3-> \texttt{ScalaCheck} gives counter-example.
+    \item<4-> Choice:
+      \begin{itemize}
+        \item<5-> Fix code.
+        \item<5-> Fix property.
+      \end{itemize}
+    \item<6-> Run \texttt{ScalaCheck} again until test passes.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Choice 1: fix code}
+
+  Assume we want our high-level property, of multiplying and dividing of integers, to hold.
+
+  Choose a different representation of integer in our application: replace \texttt{Int} with \texttt{BigInt}:
+
+  \begin{minted}{scala}
+prop {
+  x: BigInt =>
+  forAll {
+    y: BigInt =>
+    (y != 0) ==> { (x * y) / y must_== x  }
+  }
+}
+  \end{minted}
+
+  Success!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Choice 2: fix property}
+
+  Assume we only care about a limited range of \texttt{Int}.
+
+  Use a \emph{generator} \texttt{Gen.choose}, for example:
+
+  \begin{minted}{scala}
+forAll(Gen.choose(0, 10000), Gen.choose(1, 10000)) {
+  (x: Int, y: Int) => { (x * y) / y must_== x }
+}
+  \end{minted}
+
+  Success!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Introduction to custom generators: why?}
+
+  Attempted property:
+
+  \begin{minted}{scala}
+prop {
+  (x: Int, y: Int, z: Int) =>
+  (x < y && y < z) ==> x < z
+}
+  \end{minted}
+
+  Output:
+
+  \begin{minted}{console}
+> test
+Gave up after only 28 passed tests.
+  142 tests were discarded.
+  \end{minted}
+
+  Reason: too many \texttt{x}, \texttt{y}, \texttt{z} test cases that did not satisfy the condition.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Introduction to custom generators: how?}
+
+  Try to generate data likely to be useful for the property.
+
+  Use \texttt{arbitrary} generator, \texttt{Gen.choose} generator, and \texttt{for}-comprehension:
+
+  \begin{minted}{scala}
+val orderedTriples = for {
+  x <- arbitrary[Int]
+  y <- Gen.choose(x + 1, Int.MaxValue)
+  z <- Gen.choose(y + 1, Int.MaxValue)
+} yield (x, y, z)
+
+forAll(orderedTriples) {
+  case (x, y, z) =>
+  (x < y && y < z) ==> x < z
+}
+  \end{minted}
+
+  Success!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{More complex custom generator: sorted lists}
+
+  Assume we want to specify the behavior of a function that inserts an integer into a sorted list to return a new sorted list:
+  \begin{minted}{scala}
+def insert(x: Int, xs: List[Int]): List[Int]
+  \end{minted}
+  
+  We first try
+  \begin{minted}{scala}
+prop {
+  (x: Int, xs: List[Int]) =>
+  isSorted(xs) ==> isSorted(insert(x, xs))
+}
+  \end{minted}
+
+  where we have already defined
+  \begin{minted}{scala}
+def isSorted(xs: List[Int]): Boolean
+  \end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Not constrained enough}
+
+  Too many generated lists are not sorted.
+
+  \begin{minted}{console}
+> test-only *ListCheckSpec
+Gave up after only 10 passed tests.
+  91 tests were discarded.
+  \end{minted}
+
+  So let's write a custom generator \texttt{someSortedLists}, to use with the property
+  \begin{minted}{scala}
+forAll(someSortedLists) {
+  xs: List[Int] => prop {
+    x: Int =>
+    isSorted(xs) ==> isSorted(insert(x, xs))
+  }
+}
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Custom generator for sorted lists}
+
+  \begin{itemize}
+    \item Choose a list size.
+    \item Choose a starting integer \texttt{x}.
+    \item Choose a list with first element at least \texttt{x}.
+  \end{itemize}
+
+  \begin{minted}{scala}
+val someSortedLists = for {
+  size <- Gen.choose(0, 1000)
+  x <- arbitrary[Int]
+  xs <- sortedListsFromAtLeast(size, x)
+} yield xs
+  \end{minted}
+
+  Now implement our \texttt{sortedListsFromAtLeast}.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating the sorted list}
+
+  \begin{minted}{scala}
+/**
+  @return generator of a sorted list of length size
+          with first element >= x
+ */
+def sortedListsFromAtLeast(size: Int, x: Int):
+    Gen[List[Int]] = {
+  if (size == 0) {
+    Nil
+  }
+  else {
+    for {
+      y <- Gen.choose(x, x+100)
+      ys <- sortedListsFromAtLeast(size-1, y)
+    } yield y::ys
+  }
+}
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{What is going on? Classifiers}
+
+  Gather statistics about the nature of the generated data. One way: classifiers.
+
+  \begin{minted}{scala}
+forAll(someSortedLists) {
+  xs: List[Int] => classify(xs.length < 300,
+                            "length 0-299") {
+    classify(xs.length >= 300 && xs.length < 800,
+             "length 300-799") {
+      classify(xs.length >= 800,
+               "length 800+") {
+        prop {
+          x: Int =>
+          isSorted(xs) ==> isSorted(insert(x, xs))
+        }
+      }
+    }
+  }
+}
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Classifier output}
+
+  Output:
+  \begin{minted}{console}
+> test-only *ListCheckSpec
+[info] > Collected test data: 
+[info] 42% length 300-799
+[info] 31% length 0-299
+[info] 27% length 800+
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Much more!}
+
+  Examples not covered today.
+
+  \begin{itemize}
+    \item<1-> Built-in support for generating sized containers.
+    \item<2-> Specify custom frequencies when choosing alternatives.
+    \item<3-> Generate objects such as trees.
+    \item<4-> Generate functions.
+    \item<5-> Supply own random number generator.
+    \item<6-> Stateful testing.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Warning: false sense of security}
+
+  \begin{itemize}
+    \item Automated testing: good
+    \item Lots and lots of tests: good?
+    \item Fallacy of \href{http://radar.oreilly.com/2013/04/data-skepticism.html}{big data overoptimism}
+  \end{itemize}
+
+  Testing is not proof: \emph{absence of evidence} of bugs does not equal \emph{evidence of absence} of bugs.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Other property-based testing tools}
+
+  \texttt{ScalaCheck} has known limitations:
+  \begin{itemize}
+    \item Not always easy to write good generator.
+    \item Random generation does not provide complete coverage.
+    \item Tests do not give the same results when run again.
+  \end{itemize}
+
+  Alternatives:
+  \begin{itemize}
+    \item \href{http://www.cs.york.ac.uk/fp/smallcheck/}{SmallCheck} for Haskell
+      \begin{itemize}
+        \item Apparently \href{https://github.com/dwhjames/smallcheck4scala}{ported to Scala}
+      \end{itemize}
+    \item Active area of research
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The TDD community}
+  
+  \begin{itemize}
+    \item \texttt{JUnit} incorporating some property-based ideas in the new feature called \href{https://github.com/junit-team/junit/wiki/Theories}{Theories}
+    \item Many other programming languages gaining \href{http://en.wikipedia.org/wiki/QuickCheck}{property-based testing}!
+    \item \href{http://www.natpryce.com/}{Nat Pryce} of \href{http://www.growing-object-oriented-software.com/}{Growing Obect-Oriented Software Guided by Tests} giving workshops on property-based TDD
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusion}
+
+  \begin{itemize}
+    \item Automated testing is good.
+    \item Property-based testing: put into your toolbox.
+      \begin{itemize}
+        \item If you use Scala: use \texttt{ScalaCheck}.
+        \item If you use Java: use \texttt{ScalaCheck}!
+      \end{itemize}
+    \item Be aware of limitations of testing.
+    \item Have fun!
+  \end{itemize}
+\end{frame}
+
+\end{document}
