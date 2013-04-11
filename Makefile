@@ -2,9 +2,13 @@
 # Minted requires Pygments: http://pygments.org/ 
 PDFLATEX = pdflatex
 
-all:	slides.pdf
+all:	handout.pdf presentation.pdf
 
-slides.pdf:	slides.tex
+handout.pdf:	slides.tex
+
+presentation.pdf:	slides.tex
+
+%.pdf:	%.tex
 	$(PDFLATEX) -shell-escape $^
 
 .PHONY:	all

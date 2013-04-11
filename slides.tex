@@ -1,14 +1,7 @@
-\documentclass{beamer}
-
-\mode<presentation>
-
 \usepackage{minted}
 
-% End up with magenta links; don't know how to change color; linkcolor fails
-\hypersetup{colorlinks=true}
-
 \title{Beyond \texttt{xUnit} example-based testing: property-based testing with \href{https://github.com/rickynils/scalacheck}{\texttt{ScalaCheck}}}
-\author{\href{http://franklinchen.com/}{Franklin Chen}}
+\author{Franklin Chen \\ \url{http://franklinchen.com/}}
 \date{\href{http://www.meetup.com/Pittsburgh-Scala-Meetup/events/108080782}{Pittsburgh Scala Meetup} \\
 April 11, 2013
 }
@@ -565,6 +558,9 @@ forAll(someSortedLists) {
     \item Be aware of limitations of testing.
     \item Have fun!
   \end{itemize}
+
+  All materials for this talk available at \url{https://github.com/franklinchen/talk-on-scalacheck}.
+
 \end{frame}
 
 \end{document}

@@ -1,4 +1,8 @@
 target
+.idea*
+.classpath
+.project
+*.sublime-project
 .ensime*
 *.aux
 *.log
