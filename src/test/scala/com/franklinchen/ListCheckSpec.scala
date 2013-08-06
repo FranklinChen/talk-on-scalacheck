@@ -6,11 +6,13 @@ import Gen._
 import Arbitrary.arbitrary
 import org.scalacheck.Prop._
 
-class ListCheckSpec extends Specification with ScalaCheck { def is =
-  "unconstrained insertion into sorted list is sorted" ! e1^
-  "constrained insertion into sorted list is sorted" ! e2^
-  "constrained insertion into sorted list is sorted, with classifiers" ! e3^
-  end
+class ListCheckSpec extends Specification with ScalaCheck { def is = s2"""
+  List sort
+
+    unconstrained insertion into sorted list is sorted                 $e1
+    constrained insertion into sorted list is sorted                   $e2
+    constrained insertion into sorted list is sorted, with classifiers $e3
+  """
 
   def e1 = prop {
     (x: Int, xs: List[Int]) =>

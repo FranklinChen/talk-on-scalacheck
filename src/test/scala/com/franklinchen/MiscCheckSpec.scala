@@ -6,10 +6,12 @@ import Gen._
 import Arbitrary.arbitrary
 import org.scalacheck.Prop._
 
-class MiscCheckSpec extends Specification with ScalaCheck { def is =
-  "3 integers, unconstrained, transitive under <" ! e1^
-  "3 integers, custom generated, transitive under <" ! e2^
-  end
+class MiscCheckSpec extends Specification with ScalaCheck { def is = s2"""
+  Integer stuff
+
+    3 integers, unconstrained, transitive under <      $e1
+    3 integers, custom generated, transitive under <   $e2
+  """
 
   def e1 = prop {
     (x: Int, y: Int, z: Int) =>

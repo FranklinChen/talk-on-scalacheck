@@ -3,9 +3,11 @@ package com.franklinchen
 import org.specs2._
 import org.specs2.matcher._
 
-class ListOpsTableSpec extends Specification with DataTables { def is =
-  "Test list append with hand-crafted table of examples" ! e1^
-  end
+class ListOpsTableSpec extends Specification with DataTables { def is = s2"""
+  Test list append with hand-crafted table of examples
+
+    Table $e1
+  """
 
   def e1 = 
     "xs"       | "ys"       |

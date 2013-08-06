@@ -5,11 +5,14 @@ import org.scalacheck._
 import Gen._
 import org.scalacheck.Prop._
 
-class InttOpsCheckSpec extends Specification with ScalaCheck { def is =
-  "integer multiplying and dividing same integer gives back original?" ! e1^
-  "integer multiplying and dividing same nonzero integer gives back original?" ! e2^
-  "integer multiplying and dividing same nonzero BigInt gives back original" ! e3^
-  "small integer multiplying and dividing same nonzero integer gives back original" ! e4
+class IntOpsCheckSpec extends Specification with ScalaCheck { def is = s2"""
+  Integer operations
+
+    multiplying and dividing same integer gives back original?         $e1
+    multiplying and dividing same nonzero integer gives back original? $e2
+    multiplying and dividing same nonzero BigInt gives back original   $e3
+    small multiplying and dividing same nonzero integer gives back original $e4
+  """
 
   def e1 = prop {
     (x: Int, y: Int) =>
