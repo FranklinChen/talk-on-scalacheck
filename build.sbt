@@ -4,11 +4,9 @@ name := "talk-on-scalacheck"
 
 version := "1.0.0"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
-  "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
-  "org.specs2" %% "specs2" % "2.3.12" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.11.5" % "test",
+  "org.specs2" %% "specs2" % "2.4.1" % "test"
 )
-
-incOptions := incOptions.value.withNameHashing(true)
