@@ -12,12 +12,12 @@ description := "Talk on ScalaCheck given at Pittsburgh Scala in 2013"
 
 version := "1.0.0"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.scalacheck" %% "scalacheck" % "1.12.2" % Test,
-  "org.specs2" %% "specs2-core" % "3.0" % Test,
-  "org.specs2" %% "specs2-scalacheck" % "3.0" % Test
+  "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
+  "org.specs2" %% "specs2-core" % "3.6.4" % Test,
+  "org.specs2" %% "specs2-scalacheck" % "3.6.4" % Test
 )
 
 resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
