@@ -12,3 +12,4 @@ target
 *.snm
 *.toc
 *.vrb
+/_minted*
