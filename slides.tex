@@ -370,7 +370,7 @@ forAll(orderedTriples) {
   \begin{minted}{scala}
 def insert(x: Int, xs: List[Int]): List[Int]
   \end{minted}
-  
+
   We first try
   \begin{minted}{scala}
 prop {
@@ -481,7 +481,7 @@ forAll(someSortedLists) {
   Output:
   \begin{minted}{console}
 > test-only *ListCheckSpec
-[info] > Collected test data: 
+[info] > Collected test data:
 [info] 42% length 300-799
 [info] 31% length 0-299
 [info] 27% length 800+
@@ -537,7 +537,7 @@ forAll(someSortedLists) {
 
 \begin{frame}
   \frametitle{The TDD community}
-  
+
   \begin{itemize}
     \item \texttt{JUnit} incorporating some property-based ideas in the new feature called \href{https://github.com/junit-team/junit/wiki/Theories}{Theories}
     \item Many other programming languages gaining \href{http://en.wikipedia.org/wiki/QuickCheck}{property-based testing}!
@@ -564,3 +564,8 @@ forAll(someSortedLists) {
 \end{frame}
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "presentation"
+%%% End:

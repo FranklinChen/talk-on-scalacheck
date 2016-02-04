@@ -13,3 +13,7 @@ target
 *.toc
 *.vrb
 /_minted*
+/auto/
+*.fdb_latexmk
+*.fls
+*.pyg

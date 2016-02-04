@@ -15,7 +15,6 @@ version := "1.0.0"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
-  "org.specs2" %% "specs2-core" % "3.6.5" % Test,
-  "org.specs2" %% "specs2-scalacheck" % "3.6.5" % Test
+  "org.specs2" %% "specs2-core" % "3.7" % Test,
+  "org.specs2" %% "specs2-scalacheck" % "3.7" % Test
 )
